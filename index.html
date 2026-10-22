@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f5e6e">
+  <title>EnSE Fun Facts</title>
+  <meta name="description" content="Random fun facts about environmental and sanitary engineering.">
+  <style>
+    :root {
+      --bg-top: #e6f4f1;
+      --bg-bottom: #d3ebf3;
+      --card: #ffffff;
+      --text: #17343b;
+      --muted: #4f6d73;
+      --blue: #1f7a99;
+      --blue-dark: #0f5e6e;
+      --green: #2e8b67;
+      --green-soft: #dff1e8;
+      --shadow: 0 10px 30px rgba(15, 94, 110, 0.14);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-top: #0d2228;
+        --bg-bottom: #0a1b24;
+        --card: #13313a;
+        --text: #e3f2f1;
+        --muted: #9fbfc2;
+        --blue: #4fb3d1;
+        --blue-dark: #2b8fae;
+        --green: #5cc49a;
+        --green-soft: #1b4237;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+    }
+    header { text-align: center; margin: 8px 0 20px; }
+    h1 { font-size: 1.6rem; margin: 0 0 6px; color: var(--blue-dark); }
+    @media (prefers-color-scheme: dark) { h1 { color: var(--blue); } }
+    header p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+    main { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 24px 20px;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 14px;
+      border-top: 5px solid var(--green);
+    }
+    .fade { animation: fadeIn 0.5s ease both; }
+    .fade-out { animation: fadeOut 0.2s ease both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes fadeOut { to { opacity: 0; transform: translateY(-4px); } }
+    @media (prefers-reduced-motion: reduce) { .fade, .fade-out { animation: none; } }
+    .category {
+      align-self: flex-start;
+      background: var(--green-soft);
+      color: var(--green);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 999px;
+    }
+    .fact { font-size: 1.15rem; line-height: 1.55; margin: 0; }
+    .placeholder { color: var(--muted); text-align: center; }
+    button {
+      font: inherit;
+      border: 0;
+      cursor: pointer;
+      border-radius: 16px;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.1s ease, filter 0.2s ease;
+    }
+    button:active { transform: scale(0.97); }
+    button:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+    #factBtn {
+      width: 100%;
+      padding: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      box-shadow: var(--shadow);
+    }
+    #shareBtn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--blue-dark);
+      background: var(--card);
+      border: 2px solid var(--blue);
+    }
+    @media (prefers-color-scheme: dark) { #shareBtn { color: var(--blue); } }
+    #shareBtn:disabled { opacity: 0.45; cursor: default; }
+    .count { text-align: center; color: var(--muted); font-size: 0.85rem; margin: 0; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      transform: translate(-50%, 20px);
+      background: var(--blue-dark);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      max-width: calc(100vw - 32px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>💧 EnSE Fun Facts</h1>
+    <p>Environmental &amp; Sanitary Engineering trivia</p>
+  </header>
+
+  <main>
+    <section class="card" id="card" aria-live="polite">
+      <p class="fact placeholder">Tap the button below to learn something new about water, waste, air, and sanitation.</p>
+    </section>
+    <button id="factBtn" type="button">Give me a fact</button>
+    <button id="shareBtn" type="button" disabled>Share (copy fact)</button>
+    <p class="count" id="count"></p>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const FACTS = [
+      // Water treatment
+      { c: "Water Treatment", t: "Jersey City, New Jersey became the first U.S. city to continuously chlorinate its public water supply in 1908, which helped drive dramatic declines in typhoid and cholera." },
+      { c: "Water Treatment", t: "The first municipal water filter was built in Paisley, Scotland, in 1804 — and slow sand filters built on the same idea are still used around the world today." },
+      { c: "Water Treatment", t: "UV disinfection kills microbes without adding chemicals: ultraviolet light damages their DNA so they can't reproduce." },
+      { c: "Water Treatment", t: "Seawater reverse osmosis plants push water through membranes at roughly 50 to 80 times atmospheric pressure to squeeze out the salt." },
+      { c: "Water Treatment", t: "Singapore's NEWater, launched in 2003, purifies treated wastewater so thoroughly with membranes and UV that it is cleaner than many tap waters." },
+      { c: "Water Treatment", t: "Only about 2.5% of Earth's water is fresh, and most of that is locked in ice and groundwater — well under 1% is easily accessible for people." },
+      { c: "Water Treatment", t: "Grand Rapids, Michigan was the first city in the world to fluoridate its drinking water to prevent tooth decay, starting in 1945." },
+
+      // Wastewater
+      { c: "Wastewater", t: "The activated sludge process — the workhorse of modern sewage treatment — was developed in 1913–1914 by Edward Ardern and William Lockett in Manchester, England." },
+      { c: "Wastewater", t: "The standard BOD test runs for 5 days at 20 °C. A popular explanation: Britain's Royal Commission chose 5 days because few British rivers take longer than that to reach the sea." },
+      { c: "Wastewater", t: "Anaerobic digesters turn sewage sludge into biogas that is typically 50–70% methane — enough to power many treatment plants themselves." },
+      { c: "Wastewater", t: "In 2017, a 'fatberg' of congealed fat, oil, wet wipes and grease about 250 meters long and weighing roughly 130 tonnes was found clogging a London sewer in Whitechapel." },
+      { c: "Wastewater", t: "Constructed wetlands use plants, soil and microbes to treat wastewater naturally, with little or no electricity." },
+      { c: "Wastewater", t: "Just one gallon of used motor oil can contaminate up to a million gallons of fresh water — so never pour it down a drain." },
+
+      // Solid waste
+      { c: "Solid Waste", t: "Recycling aluminum saves about 95% of the energy needed to make new aluminum from raw ore, and cans can be recycled over and over without losing quality." },
+      { c: "Solid Waste", t: "Landfills produce methane as buried waste decomposes without oxygen. Over 100 years, methane traps roughly 28 times more heat than carbon dioxide." },
+      { c: "Solid Waste", t: "Glass can be recycled endlessly without losing purity or strength." },
+
+      // Air quality
+      { c: "Air Quality", t: "PM2.5 particles are 2.5 micrometers or smaller — about 30 times thinner than a human hair — small enough to reach deep into the lungs." },
+      { c: "Air Quality", t: "London's Great Smog of December 1952 killed thousands of people in just a few days and led to the UK's Clean Air Act of 1956." },
+      { c: "Air Quality", t: "Ozone is 'good up high, bad nearby': in the stratosphere it shields us from UV, but at ground level it is a lung-irritating pollutant formed in smog." },
+
+      // Plumbing
+      { c: "Plumbing", t: "The word 'plumbing' comes from the Latin 'plumbum', meaning lead — the metal Romans used for their water pipes. It's also why lead's chemical symbol is Pb." },
+      { c: "Plumbing", t: "Alexander Cumming patented the S-shaped trap in 1775. The water that sits in the bend of a trap blocks sewer gases from entering buildings." },
+      { c: "Plumbing", t: "Plumbing vents let air into drain lines so flowing water doesn't siphon traps dry — that's the job of the pipe sticking out of your roof." },
+
+      // Sanitation history
+      { c: "Sanitation History", t: "In 1854, Dr. John Snow traced a London cholera outbreak to the Broad Street water pump. Removing the pump's handle became a founding story of epidemiology." },
+      { c: "Sanitation History", t: "The 'Great Stink' of 1858, when the Thames smelled so bad Parliament could barely meet, pushed London to build Joseph Bazalgette's huge sewer network." },
+      { c: "Sanitation History", t: "Rome's Cloaca Maxima, one of the world's earliest sewers, dates back to around the 6th century BCE — and parts of it still carry water today." },
+      { c: "Sanitation History", t: "Cities of the Indus Valley Civilization, like Mohenjo-daro, had covered street drains and household bathrooms more than 4,000 years ago." },
+      { c: "Sanitation History", t: "Sir John Harington designed an early flush toilet in 1596 and installed one for his godmother, Queen Elizabeth I." },
+      { c: "Sanitation History", t: "World Toilet Day is observed every November 19 and has been an official UN day since 2013 — billions of people still lack safely managed sanitation." },
+
+      // Philippines
+      { c: "Philippines", t: "RA 9003, the Ecological Solid Waste Management Act of 2000, requires waste segregation at source and a Materials Recovery Facility (MRF) in every barangay or cluster of barangays." },
+      { c: "Philippines", t: "RA 9003 prohibits open dumpsites. Its passage followed the July 2000 Payatas dumpsite tragedy in Quezon City, where a trash slide killed more than 200 people." },
+      { c: "Philippines", t: "PD 856, the Code on Sanitation of the Philippines, was signed in 1975. It sets sanitation rules for water supply, food establishments, sewage, refuse disposal and more." },
+      { c: "Philippines", t: "In 2008, the Supreme Court issued a 'continuing mandamus' ordering government agencies to clean up Manila Bay to Class SB — safe for swimming and contact recreation." },
+      { c: "Philippines", t: "The Philippine Clean Water Act (RA 9275 of 2004) directs the DPWH to prepare a National Sewerage and Septage Management Program for cities and towns." },
+      { c: "Philippines", t: "Septic tanks need regular desludging — commonly about every 5 years — because accumulated sludge reduces treatment and can leak into groundwater and waterways." },
+      { c: "Philippines", t: "In Metro Manila, the water concessionaires offer scheduled septic tank desludging to customers, and the collected septage is treated at septage treatment plants." },
+      { c: "Philippines", t: "The Philippine Clean Air Act (RA 8749 of 1999) bans the burning of municipal, biomedical and hazardous waste that emits poisonous and toxic fumes." },
+      { c: "Philippines", t: "Angat Dam in Bulacan supplies the large majority of Metro Manila's raw water — roughly 90% by commonly cited estimates." },
+      { c: "Philippines", t: "Laguna de Bay is the largest lake in the Philippines, covering about 900 square kilometers, and it supports fisheries and water supply for nearby communities." },
+      { c: "Philippines", t: "The Extended Producer Responsibility Act of 2022 (RA 11898) requires large companies to recover a growing share of their plastic packaging waste." },
+    ];
+
+    const card = document.getElementById("card");
+    const factBtn = document.getElementById("factBtn");
+    const shareBtn = document.getElementById("shareBtn");
+    const countEl = document.getElementById("count");
+    const toast = document.getElementById("toast");
+
+    // Shuffled deck so every fact appears once before any repeats
+    let deck = [];
+    let current = null;
+    let seen = 0;
+
+    function refillDeck() {
+      deck = FACTS.map((_, i) => i);
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      // Avoid showing the same fact twice in a row across decks
+      if (current !== null && deck[deck.length - 1] === current) {
+        [deck[0], deck[deck.length - 1]] = [deck[deck.length - 1], deck[0]];
+      }
+    }
+
+    function render(fact) {
+      card.innerHTML = "";
+      const label = document.createElement("span");
+      label.className = "category";
+      label.textContent = fact.c;
+      const text = document.createElement("p");
+      text.className = "fact";
+      text.textContent = fact.t;
+      card.append(label, text);
+      card.classList.remove("fade-out", "fade");
+      void card.offsetWidth; // restart animation
+      card.classList.add("fade");
+    }
+
+    function showFact() {
+      if (deck.length === 0) refillDeck();
+      current = deck.pop();
+      seen++;
+      card.classList.remove("fade");
+      card.classList.add("fade-out");
+      setTimeout(() => render(FACTS[current]), 180);
+      shareBtn.disabled = false;
+      countEl.textContent = `Fact ${Math.min(seen, FACTS.length)} of ${FACTS.length}` +
+        (seen > FACTS.length ? " (round " + Math.ceil(seen / FACTS.length) + ")" : "");
+    }
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      ta.remove();
+      return ok;
+    }
+
+    async function shareFact() {
+      if (current === null) return;
+      const f = FACTS[current];
+      const text = `💧 ${f.c} fact: ${f.t}`;
+      let ok = false;
+      if (navigator.clipboard && window.isSecureContext) {
+        try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = false; }
+      }
+      if (!ok) ok = fallbackCopy(text);
+      showToast(ok ? "Fact copied to clipboard!" : "Couldn't copy — try long-pressing the text.");
+    }
+
+    factBtn.addEventListener("click", showFact);
+    shareBtn.addEventListener("click", shareFact);
+  </script>
+</body>
+</html>
